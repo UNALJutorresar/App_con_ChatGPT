@@ -7,131 +7,183 @@ Original file is located at
     https://colab.research.google.com/drive/1Ufi6B5w94ClvNGe23tEoIIGoj2vp0K_e
 """
 
-import pygame
 import streamlit as st
 import numpy as np
-from PIL import Image
+import pygame
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import time
+from PIL import Image
+import io
 
-# Inicialización de Pygame
-pygame.init()
-
-# Definir parámetros del pozo de pelotas
-WIDTH, HEIGHT = 600, 400
-FPS = 60
-
-# Propiedades de la pelota
-RADIUS = 20
-GRAVITY = 0.5
-FRICTION = 0.99
-
-# Definir la pantalla de Pygame
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Pozo de Pelotas")
-
-# Clase para la pelota
 class Ball:
-    def __init__(self, x, y, color):
+    def __init__(self, x, y, radius, color, velocity_x=0, velocity_y=0):
         self.x = x
         self.y = y
-        self.radius = RADIUS
+        self.radius = radius
         self.color = color
-        self.x_vel = 0
-        self.y_vel = 0
+        self.velocity_x = velocity_x
+        self.velocity_y = velocity_y
 
-    def move(self):
-        """Actualizar la posición de la pelota considerando la gravedad y la fricción."""
-        self.y_vel += GRAVITY  # Aplicar gravedad
-        self.x += self.x_vel
-        self.y += self.y_vel
-        self.x_vel *= FRICTION  # Aplicar fricción
-        self.y_vel *= FRICTION  # Aplicar fricción
+    def update(self, dt, width, height, gravity=980):  # gravity in pixels/s^2
+        # Update position
+        self.x += self.velocity_x * dt
+        self.y += self.velocity_y * dt
 
-        # Colisiones con los bordes (pantalla)
-        if self.x - self.radius < 0 or self.x + self.radius > WIDTH:
-            self.x_vel = -self.x_vel  # Rebotar en el eje X
-        if self.y - self.radius < 0 or self.y + self.radius > HEIGHT:
-            self.y_vel = -self.y_vel  # Rebotar en el eje Y
+        # Apply gravity
+        self.velocity_y += gravity * dt
 
-    def draw(self, screen):
-        """Dibujar la pelota en la pantalla."""
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
+        # Wall collisions with dampening
+        dampening = 0.7
+        if self.x - self.radius < 0:
+            self.x = self.radius
+            self.velocity_x = abs(self.velocity_x) * dampening
+        elif self.x + self.radius > width:
+            self.x = width - self.radius
+            self.velocity_x = -abs(self.velocity_x) * dampening
 
-# Crear varias pelotas
-balls = [
-    Ball(np.random.randint(50, WIDTH-50), np.random.randint(50, HEIGHT-50), (np.random.randint(255), np.random.randint(255), np.random.randint(255)))
-    for _ in range(5)
-]
+        if self.y - self.radius < 0:
+            self.y = self.radius
+            self.velocity_y = abs(self.velocity_y) * dampening
+        elif self.y + self.radius > height:
+            self.y = height - self.radius
+            self.velocity_y = -abs(self.velocity_y) * dampening
 
-def game_loop():
-    """Lógica principal del juego que maneja las pelotas y su interacción."""
-    screen.fill((255, 255, 255))  # Fondo blanco
+class BallPit:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.balls = []
+        self.surface = pygame.Surface((width, height))
 
-    # Mover y dibujar las pelotas
-    for ball in balls:
-        ball.move()
-        ball.draw(screen)
+    def add_ball(self, ball):
+        self.balls.append(ball)
 
-    pygame.display.flip()
+    def check_collisions(self):
+        for i in range(len(self.balls)):
+            for j in range(i + 1, len(self.balls)):
+                ball1 = self.balls[i]
+                ball2 = self.balls[j]
 
-def capture_screen():
-    """Capturar la pantalla de Pygame como una imagen y convertirla en un formato adecuado para Streamlit."""
-    # Capturar la pantalla de Pygame
-    pygame.image.save(screen, "pozo_pelotas.png")
+                dx = ball2.x - ball1.x
+                dy = ball2.y - ball1.y
+                distance = np.sqrt(dx**2 + dy**2)
 
-    # Abrir la imagen capturada con PIL y convertirla a un formato compatible con Streamlit
-    img = Image.open("pozo_pelotas.png")
-    return img
+                if distance < ball1.radius + ball2.radius:
+                    # Collision detected - calculate new velocities
+                    normal_x = dx / distance
+                    normal_y = dy / distance
 
-# Interfaz de Streamlit
+                    relative_velocity_x = ball1.velocity_x - ball2.velocity_x
+                    relative_velocity_y = ball1.velocity_y - ball2.velocity_y
+
+                    velocity_along_normal = (relative_velocity_x * normal_x +
+                                          relative_velocity_y * normal_y)
+
+                    # Elastic collision impulse
+                    impulse = 2 * velocity_along_normal / 2  # Assuming equal masses
+
+                    # Update velocities
+                    ball1.velocity_x -= impulse * normal_x
+                    ball1.velocity_y -= impulse * normal_y
+                    ball2.velocity_x += impulse * normal_x
+                    ball2.velocity_y += impulse * normal_y
+
+                    # Separate balls to prevent sticking
+                    overlap = (ball1.radius + ball2.radius - distance) / 2
+                    ball1.x -= overlap * normal_x
+                    ball1.y -= overlap * normal_y
+                    ball2.x += overlap * normal_x
+                    ball2.y += overlap * normal_y
+
+    def update(self, dt):
+        for ball in self.balls:
+            ball.update(dt, self.width, self.height)
+        self.check_collisions()
+
+    def draw(self):
+        self.surface.fill((255, 255, 255))
+        for ball in self.balls:
+            pygame.draw.circle(self.surface, ball.color,
+                             (int(ball.x), int(ball.y)), ball.radius)
+
+        # Convert Pygame surface to PIL Image
+        string_image = pygame.image.tostring(self.surface, 'RGB')
+        pil_image = Image.frombytes('RGB', self.surface.get_size(), string_image)
+
+        return pil_image
+
 def main():
-    st.title("Pozo de Pelotas con Física de Colisión y Gravedad")
-    st.write("Arrastra las pelotas con el cursor y observa cómo interactúan entre ellas y con las paredes.")
+    st.title("Ball Pit Physics Simulation")
 
-    # Mostrar instrucciones
-    st.markdown("""
-    **Instrucciones:**
-    - Las pelotas caen debido a la gravedad.
-    - Las pelotas rebotan entre sí y contra las paredes.
-    - Arrastra las pelotas con el mouse para moverlas.
-    """)
+    # Initialize Pygame
+    pygame.init()
 
-    # Crear el control para iniciar/pausar la animación
-    if 'is_running' not in st.session_state:
-        st.session_state.is_running = False
+    # Simulation parameters
+    WIDTH = 800
+    HEIGHT = 600
 
-    start_button = st.button('Iniciar/Pausar animación')
+    # Create ball pit
+    ball_pit = BallPit(WIDTH, HEIGHT)
 
-    if start_button:
-        st.session_state.is_running = not st.session_state.is_running
+    # Add balls with random colors
+    if 'initialized' not in st.session_state:
+        for _ in range(20):
+            x = np.random.randint(50, WIDTH-50)
+            y = np.random.randint(50, HEIGHT-50)
+            radius = np.random.randint(15, 30)
+            color = (np.random.randint(0, 255),
+                    np.random.randint(0, 255),
+                    np.random.randint(0, 255))
+            velocity_x = np.random.randint(-200, 200)
+            velocity_y = np.random.randint(-200, 200)
 
-    # Usamos st.empty() para crear un contenedor que se va a actualizar continuamente
+            ball = Ball(x, y, radius, color, velocity_x, velocity_y)
+            ball_pit.add_ball(ball)
+        st.session_state.initialized = True
+        st.session_state.ball_pit = ball_pit
+    else:
+        ball_pit = st.session_state.ball_pit
+
+    # Create a placeholder for the simulation
     frame_placeholder = st.empty()
 
-    # Si la animación está en ejecución, continuar generando fotogramas
-    while st.session_state.is_running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                st.stop()
+    # Add controls
+    cols = st.columns(2)
+    with cols[0]:
+        gravity = st.slider("Gravity", min_value=0, max_value=2000,
+                          value=980, step=100)
+    with cols[1]:
+        add_ball = st.button("Add Ball")
 
-        # Lógica del juego
-        game_loop()
+    if add_ball:
+        x = np.random.randint(50, WIDTH-50)
+        y = np.random.randint(50, HEIGHT-50)
+        radius = np.random.randint(15, 30)
+        color = (np.random.randint(0, 255),
+                np.random.randint(0, 255),
+                np.random.randint(0, 255))
+        ball = Ball(x, y, radius, color, 0, 0)
+        st.session_state.ball_pit.add_ball(ball)
 
-        # Capturar la pantalla y mostrarla en Streamlit
-        img = capture_screen()
+    # Main simulation loop
+    last_time = time.time()
+    while True:
+        current_time = time.time()
+        dt = current_time - last_time
+        last_time = current_time
 
-        # Actualizar el fotograma dentro del contenedor (sin crear nuevas celdas)
-        frame_placeholder.image(img, caption="Pozo de Pelotas", use_column_width=True)
+        # Update ball physics
+        for ball in ball_pit.balls:
+            ball.update(dt, WIDTH, HEIGHT, gravity=gravity)
+        ball_pit.check_collisions()
 
-        # Control de FPS
-        pygame.time.Clock().tick(FPS)
+        # Draw and display the frame
+        frame = ball_pit.draw()
+        frame_placeholder.image(frame, use_column_width=True)
 
-        # Pausar un momento para permitir que Streamlit actualice la interfaz
-        time.sleep(1 / FPS)
-
-    else:
-        st.write("La animación está pausada. Haz clic en 'Iniciar' para continuar.")
+        # Add a small delay to control frame rate
+        time.sleep(0.016)  # Approximately 60 FPS
 
 if __name__ == "__main__":
     main()

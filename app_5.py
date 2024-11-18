@@ -12,9 +12,7 @@ import numpy as np
 import pygame
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-import time
 from PIL import Image
-import io
 
 class Ball:
     def __init__(self, x, y, radius, color, velocity_x=0, velocity_y=0):
@@ -123,11 +121,15 @@ def main():
     WIDTH = 800
     HEIGHT = 600
 
-    # Create ball pit
-    ball_pit = BallPit(WIDTH, HEIGHT)
+    # Initialize step counter in session state
+    if 'step' not in st.session_state:
+        st.session_state.step = 0
 
-    # Add balls with random colors
-    if 'initialized' not in st.session_state:
+    # Create ball pit
+    if 'ball_pit' not in st.session_state:
+        ball_pit = BallPit(WIDTH, HEIGHT)
+
+        # Add initial balls
         for _ in range(20):
             x = np.random.randint(50, WIDTH-50)
             y = np.random.randint(50, HEIGHT-50)
@@ -140,21 +142,48 @@ def main():
 
             ball = Ball(x, y, radius, color, velocity_x, velocity_y)
             ball_pit.add_ball(ball)
-        st.session_state.initialized = True
+
         st.session_state.ball_pit = ball_pit
-    else:
-        ball_pit = st.session_state.ball_pit
 
     # Create a placeholder for the simulation
     frame_placeholder = st.empty()
 
     # Add controls
-    cols = st.columns(2)
-    with cols[0]:
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
         gravity = st.slider("Gravity", min_value=0, max_value=2000,
                           value=980, step=100)
-    with cols[1]:
+
+    with col2:
+        dt = st.slider("Time Step (ms)", min_value=1, max_value=100,
+                      value=16, step=1) / 1000.0
+
+    with col3:
         add_ball = st.button("Add Ball")
+
+    # Display current step
+    st.write(f"Current Step: {st.session_state.step}")
+
+    # Add step control buttons
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Step Forward"):
+            st.session_state.step += 1
+            st.session_state.ball_pit.update(dt)
+
+    with col2:
+        if st.button("Reset Simulation"):
+            st.session_state.step = 0
+            st.session_state.ball_pit = None
+            st.experimental_rerun()
+
+    with col3:
+        steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)
+        if st.button(f"Forward {steps} steps"):
+            for _ in range(steps):
+                st.session_state.step += 1
+                st.session_state.ball_pit.update(dt)
 
     if add_ball:
         x = np.random.randint(50, WIDTH-50)
@@ -166,24 +195,9 @@ def main():
         ball = Ball(x, y, radius, color, 0, 0)
         st.session_state.ball_pit.add_ball(ball)
 
-    # Main simulation loop
-    last_time = time.time()
-    while True:
-        current_time = time.time()
-        dt = current_time - last_time
-        last_time = current_time
-
-        # Update ball physics
-        for ball in ball_pit.balls:
-            ball.update(dt, WIDTH, HEIGHT, gravity=gravity)
-        ball_pit.check_collisions()
-
-        # Draw and display the frame
-        frame = ball_pit.draw()
-        frame_placeholder.image(frame, use_column_width=True)
-
-        # Add a small delay to control frame rate
-        time.sleep(0.016)  # Approximately 60 FPS
+    # Draw current frame
+    frame = st.session_state.ball_pit.draw()
+    frame_placeholder.image(frame, use_column_width=True)
 
 if __name__ == "__main__":
     main()

@@ -10,8 +10,8 @@ Original file is located at
 import pygame
 import streamlit as st
 import numpy as np
-import io
 from PIL import Image
+import time
 
 # Inicialización de Pygame
 pygame.init()
@@ -109,7 +109,7 @@ def main():
     frame_placeholder = st.empty()
 
     # Si la animación está en ejecución, continuar generando fotogramas
-    if st.session_state.is_running:
+    while st.session_state.is_running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -126,6 +126,10 @@ def main():
 
         # Control de FPS
         pygame.time.Clock().tick(FPS)
+
+        # Pausar un momento para permitir que Streamlit actualice la interfaz
+        time.sleep(1 / FPS)
+
     else:
         st.write("La animación está pausada. Haz clic en 'Iniciar' para continuar.")
 

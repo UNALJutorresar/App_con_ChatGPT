@@ -7,6 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/14uS8HhY1nJykgarqC4gDQ9hIQpbGqoIT
 """
 
+pip install streamlit pygame numpy
 import pygame
 import streamlit as st
 import numpy as np

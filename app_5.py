@@ -105,6 +105,9 @@ def main():
     if start_button:
         st.session_state.is_running = not st.session_state.is_running
 
+    # Usamos st.empty() para crear un contenedor que se va a actualizar continuamente
+    frame_placeholder = st.empty()
+
     # Si la animación está en ejecución, continuar generando fotogramas
     if st.session_state.is_running:
         for event in pygame.event.get():
@@ -117,7 +120,9 @@ def main():
 
         # Capturar la pantalla y mostrarla en Streamlit
         img = capture_screen()
-        st.image(img, caption="Pozo de Pelotas", use_column_width=True)
+
+        # Actualizar el fotograma dentro del contenedor (sin crear nuevas celdas)
+        frame_placeholder.image(img, caption="Pozo de Pelotas", use_column_width=True)
 
         # Control de FPS
         pygame.time.Clock().tick(FPS)

@@ -185,7 +185,7 @@ def main():
                 st.session_state.ball_pit.update(dt)
                 # Draw current frame
                 frame = st.session_state.ball_pit.draw()
-                frame_placeholder.image(frame, use_column_width=True)
+                frame_placeholder.image(frame, use_container_width=True)
                 pygame.time.wait(200)
 
     with col3:
@@ -208,7 +208,7 @@ def main():
 
     # Draw current frame
     frame = st.session_state.ball_pit.draw()
-    frame_placeholder.image(frame, use_column_width=True)
+    frame_placeholder.image(frame, use_container_width=True)
 
 if __name__ == "__main__":
     main()

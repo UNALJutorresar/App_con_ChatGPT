@@ -7,7 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1Ufi6B5w94ClvNGe23tEoIIGoj2vp0K_e
 """
 
-import time
 import streamlit as st
 import numpy as np
 import pygame
@@ -179,14 +178,14 @@ def main():
             st.session_state.ball_pit.update(dt)
 
     with col2:
-        if st.button("Run 30 frames"):
-            for _ in range(30):
-                st.session_state.step += 1
-                st.session_state.ball_pit.update(dt)
-                # Draw current frame
-                frame = st.session_state.ball_pit.draw()
-                frame_placeholder.image(frame, use_column_width=True)
-                time.sleep(1)
+        on = st.toggle("Run 30 frames"):
+        if on:
+            st.session_state.step += 1
+            st.session_state.ball_pit.update(dt)
+            # Draw current frame
+            frame = st.session_state.ball_pit.draw()
+            frame_placeholder.image(frame, use_column_width=True)
+            pygame.time.wait(30)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

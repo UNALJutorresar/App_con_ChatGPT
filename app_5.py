@@ -112,7 +112,12 @@ class BallPit:
         return pil_image
 
 def main():
-    st.title("Ball Pit Physics Simulation")
+
+    # App Title
+    st.title("Ballpit Simulator")
+
+    # App Authors
+    st.write("App developed by Juan Camilo Torres Arboleda & Claude AI.")
 
     # Initialize Pygame
     pygame.init()

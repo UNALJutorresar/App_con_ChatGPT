@@ -178,7 +178,7 @@ def main():
             st.session_state.ball_pit.update(dt)
 
     with col2:
-        on = st.toggle("Run 30 frames"):
+        on = st.toggle("Continuous Run")
         if on:
             st.session_state.step += 1
             st.session_state.ball_pit.update(dt)

@@ -180,7 +180,7 @@ def main():
 
     with col2:
         on = st.toggle("Continuous Run")
-        while on:
+        if on:
             st.session_state.step += 1
             st.session_state.ball_pit.update(dt)
             time.sleep(1)

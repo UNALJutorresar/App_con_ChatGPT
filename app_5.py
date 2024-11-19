@@ -178,14 +178,15 @@ def main():
             st.session_state.ball_pit.update(dt)
 
     with col2:
-        if st.button("Run 30 frames"):
-            for _ in range(30):
+        frames = st.number_input("Continuous Run", min_value=1, max_value=100, value=10)
+        if st.button(f"Continuous run {frames} frames"):
+            for _ in range(frames):
                 st.session_state.step += 1
                 st.session_state.ball_pit.update(dt)
                 # Draw current frame
                 frame = st.session_state.ball_pit.draw()
                 frame_placeholder.image(frame, use_column_width=True)
-                pygame.time.wait(400)
+                pygame.time.wait(300)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

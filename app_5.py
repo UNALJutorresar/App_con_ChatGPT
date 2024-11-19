@@ -182,6 +182,7 @@ def main():
         while on:
             st.session_state.step += 1
             st.session_state.ball_pit.update(dt)
+            pygame.time.wait(50)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

@@ -7,6 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1Ufi6B5w94ClvNGe23tEoIIGoj2vp0K_e
 """
 
+!pip install streamlit
+!pip install pygame
+
 import time
 import streamlit as st
 import numpy as np
@@ -181,7 +184,8 @@ def main():
     with col2:
         on = st.toggle("Continuous Run")
         if on:
-            while True:
+            st.session_state['running'] = True
+            while st.session_state['running']== True:
                 st.session_state.step += 1
                 st.session_state.ball_pit.update(dt)
                 time.sleep(3)

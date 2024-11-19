@@ -7,6 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1Ufi6B5w94ClvNGe23tEoIIGoj2vp0K_e
 """
 
+import time
 import streamlit as st
 import numpy as np
 import pygame
@@ -182,7 +183,7 @@ def main():
         while on:
             st.session_state.step += 1
             st.session_state.ball_pit.update(dt)
-            pygame.time.wait(500)
+            time.sleep(1)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

@@ -178,10 +178,10 @@ def main():
             st.session_state.ball_pit.update(dt)
 
     with col2:
-        if st.button("Reset Simulation"):
-            st.session_state.step = 0
-            st.session_state.ball_pit = None
-            st.experimental_rerun()
+        on = st.toggle("Continous Run")
+        while on:
+            st.session_state.step += 1
+            st.session_state.ball_pit.update(dt)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)
@@ -189,6 +189,7 @@ def main():
             for _ in range(steps):
                 st.session_state.step += 1
                 st.session_state.ball_pit.update(dt)
+
 
     if add_ball:
         x = np.random.randint(50, WIDTH-50)

@@ -178,11 +178,11 @@ def main():
             st.session_state.ball_pit.update(dt)
 
     with col2:
-        on = st.toggle("Continous Run")
+        on = st.toggle("Continuous Run")
         while on:
             st.session_state.step += 1
             st.session_state.ball_pit.update(dt)
-            pygame.time.wait(50)
+            pygame.time.wait(500)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

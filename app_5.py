@@ -185,7 +185,7 @@ def main():
                 # Draw current frame
                 frame = st.session_state.ball_pit.draw()
                 frame_placeholder.image(frame, use_column_width=True)
-                pygame.time.wait(30)
+                pygame.time.wait(400)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

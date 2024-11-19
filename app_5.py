@@ -184,7 +184,7 @@ def main():
             while True:
                 st.session_state.step += 1
                 st.session_state.ball_pit.update(dt)
-                time.sleep(1)
+                time.sleep(3)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

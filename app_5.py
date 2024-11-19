@@ -181,9 +181,10 @@ def main():
     with col2:
         on = st.toggle("Continuous Run")
         if on:
-            st.session_state.step += 1
-            st.session_state.ball_pit.update(dt)
-            time.sleep(1)
+            while True:
+                st.session_state.step += 1
+                st.session_state.ball_pit.update(dt)
+                time.sleep(1)
 
     with col3:
         steps = st.number_input("Multi-step", min_value=1, max_value=100, value=10)

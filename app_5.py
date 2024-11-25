@@ -117,7 +117,7 @@ def main():
     st.title("Ballpit Simulator")
 
     # App Authors
-    st.write("App developed by Juan Camilo Torres Arboleda & Claude AI.")
+    st.write("App desarrollada por Juan Camilo Torres Arboleda & ChatGPT.")
 
     # Initialize Pygame
     pygame.init()

@@ -36,10 +36,7 @@ st.write(f"Resultados de los {n_lanzamientos} lanzamientos: {resultados}")
 # Análisis estadístico
 media = np.mean(resultados)
 mediana = np.median(resultados)
-moda_result = stats.mode(resultados)
-
-# Aseguramos que tomamos solo el primer valor de la moda
-moda = moda_result.mode[0]
+moda = stats.mode(resultados).mode[0]
 varianza = np.var(resultados)
 desviacion_estandar = np.std(resultados)
 

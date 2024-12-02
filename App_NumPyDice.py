@@ -8,53 +8,41 @@ Original file is located at
 """
 
 import streamlit as st
-import random
-import pandas as pd
 import numpy as np
-from scipy import stats
 
-# Función para lanzar un dado
-def lanzar_dado(n_lanzamientos):
-    return [random.randint(1, 6) for _ in range(n_lanzamientos)]
+# Simulación de lanzamientos de dado
+lanzamientos = np.random.randint(1, 7, 20)
 
 # Título de la aplicación
 st.title("Simulador de Lanzamiento de Dado")
-
-# Mostrar los resultados de los lanzamientos
 st.write('App por Juan Camilo Torres. Lanza un número de dados y '
          'calcula su media, mediana, moda, varianza y desviación estándar')
 
-# Parámetro para el número de lanzamientos
-n_lanzamientos = 20
+# Cálculos estadísticos
+media = np.mean(lanzamientos)
+mediana = np.median(lanzamientos)
+moda = np.argmax(np.bincount(lanzamientos))  # Moda utilizando bincount
+varianza = np.var(lanzamientos)
+desviacion_estandar = np.std(lanzamientos)
 
-# Lanzar el dado y guardar los resultados
-resultados = lanzar_dado(n_lanzamientos)
+# Análisis de frecuencias
+frecuencias = np.bincount(lanzamientos)[1:]  # Ignorar el valor 0 en bincount
+frequencies_table = np.array([np.arange(1, 7), frecuencias]).T
 
-# Mostrar los resultados de los lanzamientos
-st.write(f"Resultados de los {n_lanzamientos} lanzamientos: {resultados}")
+# Mostrar resultados
+st.title("Simulación de Lanzamiento de un Dado")
+st.write("Se han realizado 20 lanzamientos del dado. Los resultados son los siguientes:")
 
-# Análisis estadístico
-media = np.mean(resultados)
-mediana = np.median(resultados)
-moda = stats.mode(resultados).mode[0]
-varianza = np.var(resultados)
-desviacion_estandar = np.std(resultados)
+# Mostrar los lanzamientos
+st.write(lanzamientos)
 
-# Mostrar estadísticas
-st.subheader("Análisis Estadístico")
-st.write(f"Media: {media}")
-st.write(f"Mediana: {mediana}")
-st.write(f"Moda: {moda}")
-st.write(f"Varianza: {varianza}")
-st.write(f"Desviación Estándar: {desviacion_estandar}")
-
-# Tabla de frecuencias
-frecuencias = pd.DataFrame({
-    'Número': [1, 2, 3, 4, 5, 6],
-    'Frecuencia': [resultados.count(i) for i in range(1, 7)],
-    'Porcentaje': [resultados.count(i) / n_lanzamientos * 100 for i in range(1, 7)]
-})
+# Mostrar análisis estadísticos
+st.write(f"**Media**: {media}")
+st.write(f"**Mediana**: {mediana}")
+st.write(f"**Moda**: {moda}")
+st.write(f"**Varianza**: {varianza}")
+st.write(f"**Desviación Estándar**: {desviacion_estandar}")
 
 # Mostrar tabla de frecuencias
-st.subheader("Frecuencias de los Resultados")
-st.write(frecuencias)
+st.write("**Tabla de Frecuencias**:")
+st.write(frequencies_table, columns=["Número", "Frecuencia"])

@@ -13,11 +13,6 @@ import numpy as np
 # Simulación de lanzamientos de dado
 lanzamientos = np.random.randint(1, 7, 20)
 
-# Título de la aplicación
-st.title("Simulador de Lanzamiento de Dado")
-st.write('App por Juan Camilo Torres. Lanza un número de dados y '
-         'calcula su media, mediana, moda, varianza y desviación estándar')
-
 # Cálculos estadísticos
 media = np.mean(lanzamientos)
 mediana = np.median(lanzamientos)
@@ -30,7 +25,9 @@ frecuencias = np.bincount(lanzamientos)[1:]  # Ignorar el valor 0 en bincount
 frequencies_table = np.array([np.arange(1, 7), frecuencias]).T
 
 # Mostrar resultados
-st.title("Simulación de Lanzamiento de un Dado")
+st.title("Simulación de Lanzamiento de Dados")
+st.write('App por Juan Camilo Torres. Lanza 20 dados y '
+         'calcula su media, mediana, moda, varianza y desviación estándar')
 st.write("Se han realizado 20 lanzamientos del dado. Los resultados son los siguientes:")
 
 # Mostrar los lanzamientos

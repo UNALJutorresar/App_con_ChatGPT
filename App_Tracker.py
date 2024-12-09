@@ -32,10 +32,10 @@ def filtrar_por_estado(df):
 
 def calcular_tiempos_entrega(df):
     df['Fecha_Pedido'] = pd.to_datetime(df['Fecha_Pedido'])
-    df['Fecha_entrega'] = pd.to_datetime(df['Fecha_entrega'], errors='coerce')
+    df['Fecha_Entrega'] = pd.to_datetime(df['Fecha_Entrega'], errors='coerce')
 
     # Calcular tiempos de entrega
-    df['Tiempo_Entrega'] = (df['Fecha_entrega'] - df['Fecha_Pedido']).dt.days
+    df['Tiempo_Entrega'] = (df['Fecha_Entrega'] - df['Fecha_Pedido']).dt.days
     tiempos_validos = df['Tiempo_Entrega'].dropna()
 
     if not tiempos_validos.empty:
@@ -56,7 +56,8 @@ def generar_informe_descargable(df):
 
 def main():
     st.title("Gestión de Pedidos")
-    st.write("Carga un archivo CSV con la estructura especificada para comenzar.")
+    st.write("App desarrollada por Juan Camilo Torres Arboleda.")
+    st.write("Carga un archivo CSV para comenzar.")
 
     # Cargar datos
     df = cargar_csv()
